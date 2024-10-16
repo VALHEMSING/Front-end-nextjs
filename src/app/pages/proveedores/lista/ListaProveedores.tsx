@@ -223,7 +223,7 @@ const ProveedorLista = () => {
             <Card 
               sx={{ 
                 transition: '0.8s', 
-                '&:hover': { transform: 'scale(1.05)' },
+                '&:hover': { transform: 'scale(1.1)' },
                 backgroundColor: '#f0f0f0',
                 padding: '20px',
                 boxShadow: 3,

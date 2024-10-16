@@ -1,0 +1,8 @@
+.barraNavegacion {
+    width: 100%;
+  }
+  
+  /* Ajusta el estilo del Drawer si lo deseas */
+  .MuiDrawer-paper {
+    background-color: #f4f4f4; /* Cambia el fondo del Drawer */
+  }

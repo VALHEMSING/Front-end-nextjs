@@ -19,8 +19,8 @@ import Link from "next/link";
 // Estilos personalizados para los elementos del sidebar
 const SidebarContainer = styled(Box)({
   width: 250,
-  backgroundColor: "#1e1e2f", // Color del sidebar
-  height: "100vh", // Altura completa del viewport
+  background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)", // Gradiente similar al de los otros componentes
+  height: "100vh",
   color: "#fff",
   padding: "20px",
   transition: "all 0.3s ease-in-out",
@@ -31,22 +31,22 @@ const SidebarHeader = styled(Typography)({
   fontWeight: "bold",
   textAlign: "center",
   marginBottom: "1rem",
-  color: "#ffc107", // Color del encabezado
+  color: "#fff", // Cambiado a blanco para mejor contraste
 });
 
 const SidebarItem = styled(ListItem)({
   padding: "15px 10px",
   margin: "10px 0",
-  borderRadius: "5px",
+  borderRadius: "10px", // Bordes más redondeados
+  transition: "background-color 0.3s ease, transform 0.3s ease",
   "&:hover": {
-    backgroundColor: "#ffc107", // Color al pasar el ratón
-    color: "#1e1e2f",
-    transition: "all 0.3s ease-in-out",
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Fondo semi-transparente al pasar el ratón
+    transform: "translateY(-3px)", // Efecto de elevación sutil
   },
 });
 
 const SidebarDivider = styled(Divider)({
-  backgroundColor: "#ffc107", // Color del divisor
+  backgroundColor: "rgba(255, 255, 255, 0.2)", // Divisor semi-transparente
   margin: "10px 0",
 });
 
@@ -64,24 +64,24 @@ const Navbar = () => {
     <SidebarContainer role="presentation" onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
       <SidebarHeader variant="h6">Navegación</SidebarHeader>
       <List>
-        <SidebarItem >
-          <Link href="/pages/home/" passHref>
+        <SidebarItem>
+          <Link href="/pages/home/" passHref style={{ color: "inherit", textDecoration: "none", width: "100%" }}>
             <ListItemText primary="Home" />
           </Link>
         </SidebarItem>
-        <SidebarItem >
-          <Link href="/pages/proveedores" passHref>
+        <SidebarItem>
+          <Link href="/pages/proveedores" passHref style={{ color: "inherit", textDecoration: "none", width: "100%" }}>
             <ListItemText primary="Proveedores" />
           </Link>
         </SidebarItem>
-        <SidebarItem >
-          <Link href="/pages/clientes" passHref>
+        <SidebarItem>
+          <Link href="/pages/clientes" passHref style={{ color: "inherit", textDecoration: "none", width: "100%" }}>
             <ListItemText primary="Clientes" />
           </Link>
         </SidebarItem>
       </List>
       <SidebarDivider />
-      <Typography variant="caption" sx={{ textAlign: "center", display: "block", marginTop: "1rem" }}>
+      <Typography variant="caption" sx={{ textAlign: "center", display: "block", marginTop: "1rem", opacity: 0.7 }}>
         Sistema de Gestión © 2024
       </Typography>
     </SidebarContainer>
@@ -89,12 +89,14 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Botón para abrir el sidebar */}
-      <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)} sx={{ position: "absolute", top: 16, left: 16 }}>
-        <MenuIcon sx={{ color: "#ffc107" }} />
-      </IconButton>
+      <AppBar position="fixed" sx={{ background: "transparent", boxShadow: "none" }}>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
+            <MenuIcon sx={{ color: "#fff" }} />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      {/* Sidebar */}
       <Drawer anchor="left" open={isOpen} onClose={toggleDrawer(false)}>
         {sidebarContent}
       </Drawer>

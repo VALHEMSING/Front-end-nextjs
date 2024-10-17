@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -17,14 +17,32 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 
-// Definir estilos personalizados para los botones de acción
+// Estilo para las tarjetas dinámicas
+const StyledCard = styled(Card)(({ theme }) => ({
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-8px)", // Movimiento suave al hover
+  },
+  width: "100%", // Ancho completo en pantallas pequeñas
+  marginBottom: theme.spacing(3),
+  borderRadius: "20px", // Bordes más redondeados
+  backgroundColor: "#f9f9f9", // Fondo suave para las tarjetas
+  padding: theme.spacing(3), // Espaciado interno
+  [theme.breakpoints.up("md")]: {
+    width: "75%", // Ancho más grande en pantallas medianas y grandes
+    margin: "auto", // Centrado horizontal en pantallas más grandes
+  },
+}));
+
+// Estilo para los botones de acción personalizados
 const ActionButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(1),
-  padding: theme.spacing(1),
+  padding: theme.spacing(1.5),
   fontSize: "0.875rem",
   fontWeight: "bold",
   textTransform: "none",
-  borderRadius: "8px",
+  borderRadius: "10px",
+  transition: "background-color 0.3s ease",
 }));
 
 const ActivateButton = styled(ActionButton)({
@@ -61,14 +79,14 @@ const UpdateButton = styled(ActionButton)({
 
 const ProveedorLista = () => {
   const [proveedores, setProveedores] = useState([]);
-  const [selectedProveedor, setSelectedProveedor] = useState<any>(null);
   const [openModal, setOpenModal] = useState(false);
   const [formValues, setFormValues] = useState({
     nombre_proveedor: "",
     email_proveedor: "",
     celular_proveedor: "",
-    activo_proveedor: true, 
+    activo_proveedor: true,
   });
+  const [selectedProveedor, setSelectedProveedor] = useState<any>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [actionType, setActionType] = useState<'create' | 'update'>('create');
@@ -90,27 +108,31 @@ const ProveedorLista = () => {
     }
   };
 
-  const handleCardClick = (proveedor: any) => {
+  const handleOpenModal = (proveedor: any = null) => {
     setSelectedProveedor(proveedor);
-    setFormValues({
-      nombre_proveedor: proveedor.nombre_proveedor,
-      email_proveedor: proveedor.email_proveedor,
-      celular_proveedor: proveedor.celular_proveedor,
-      activo_proveedor: proveedor.activo_proveedor,
-    });
-    setActionType('update');
+    if (proveedor) {
+      setFormValues({
+        nombre_proveedor: proveedor.nombre_proveedor,
+        email_proveedor: proveedor.email_proveedor,
+        celular_proveedor: proveedor.celular_proveedor,
+        activo_proveedor: proveedor.activo_proveedor,
+      });
+      setActionType('update');
+    } else {
+      setFormValues({
+        nombre_proveedor: "",
+        email_proveedor: "",
+        celular_proveedor: "",
+        activo_proveedor: true,
+      });
+      setActionType('create');
+    }
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedProveedor(null);
-    setFormValues({
-      nombre_proveedor: "",
-      email_proveedor: "",
-      celular_proveedor: "",
-      activo_proveedor: true, 
-    });
   };
 
   const handleInputChange = (e: any) => {
@@ -121,20 +143,17 @@ const ProveedorLista = () => {
     });
   };
 
-  const handleRegisterAndEnroll = async () => {
+  const handleSaveProveedor = async () => {
     try {
       let url;
       let method;
-
       if (actionType === 'create') {
         url = 'http://localhost:2000/api/proveedores';
         method = 'POST';
-        
       } else if (actionType === 'update') {
         url = `http://localhost:2000/api/proveedores/update/${selectedProveedor._id}`;
         method = 'PUT';
       }
-
       const response = await fetch(`${url}`, {
         method: method,
         headers: {
@@ -142,18 +161,15 @@ const ProveedorLista = () => {
         },
         body: JSON.stringify(formValues),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al registrar o actualizar el proveedor');
+        throw new Error(errorData.error || 'Error al guardar el proveedor');
       }
-
-      setOpenSnackbar(true);
-      handleCloseModal();
       fetchProveedores();
+      handleCloseModal();
     } catch (error) {
-      console.error("Error al registrar o actualizar un proveedor:", error);
-      setErrorMessage("Error al registrar o actualizar el proveedor");
+      console.error("Error al guardar el proveedor:", error);
+      setErrorMessage("Error al guardar el proveedor");
       setOpenSnackbar(true);
     }
   };
@@ -169,13 +185,7 @@ const ProveedorLista = () => {
 
   const handleDeactivate = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:2000/api/proveedores/deactive/${id}`, { method: 'PUT' });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al desactivar el proveedor');
-      }
-      
+      await fetch(`http://localhost:2000/api/proveedores/deactive/${id}`, { method: 'PUT' });
       fetchProveedores();
     } catch (error) {
       console.error("Error al desactivar el proveedor:", error);
@@ -197,95 +207,99 @@ const ProveedorLista = () => {
   };
 
   return (
-    <Container sx={{ 
-      zIndex: 20, 
-      background: 'linear-gradient(to right, #6a11cb, #2575fc)',
-      marginTop:'100px',
-      padding: '20px', 
-      borderRadius: '8px' 
-    }}>
-      
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={() => { 
-          setActionType('create'); 
-          setOpenModal(true); 
-        }}
-        sx={{ marginBottom: '20px' }}
-      >
-        Crear Proveedor
-      </Button>
+    <Container maxWidth="lg" style={{ marginTop: "100px" }}>
+      <section style={{
+        background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)", // Gradiente de colores
+        padding: "20px", // Espaciado interno
+        borderRadius: "10px", // Bordes redondeados
+        color: "#fff" // Color del texto
+      }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleOpenModal()}
+          style={{ marginBottom: "30px" }} // Espaciado adicional
+        >
+          Crear Proveedor
+        </Button>
+        <Grid container spacing={4}>
+          {proveedores.map((proveedor: any) => (
+            <Grid item xs={12} md={6} key={proveedor._id}>
+              <StyledCard>
+                <CardContent>
+                  <Typography variant="h6" component="div" gutterBottom>
+                    {proveedor.nombre_proveedor}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Email: {proveedor.email_proveedor}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Celular: {proveedor.celular_proveedor}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    style={{ 
+                      color: proveedor.activo_proveedor ? "#4caf50" : "#f44336", // Verde si está activo, rojo si está inactivo
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {proveedor.activo_proveedor ? "Activo" : "Desactivado"}
+                  </Typography>
+                  <UpdateButton onClick={() => handleOpenModal(proveedor)}>
+                    Actualizar
+                  </UpdateButton>
+                  {proveedor.activo_proveedor ? (
+                    <DeactivateButton onClick={() => handleDeactivate(proveedor._id)}>
+                      Desactivar
+                    </DeactivateButton>
+                  ) : (
+                    <ActivateButton onClick={() => handleActivate(proveedor._id)}>
+                      Activar
+                    </ActivateButton>
+                  )}
+                  <DeleteButton onClick={() => handleDelete(proveedor._id)}>
+                    Eliminar
+                  </DeleteButton>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+          ))}
+        </Grid>
+      </section>
 
-      <Grid container spacing={5}>
-        {proveedores.map((proveedor: any) => (
-          <Grid item xs={12} sm={6} md={3} key={proveedor._id}>
-            <Card 
-              sx={{ 
-                transition: '0.8s', 
-                '&:hover': { transform: 'scale(1.1)' },
-                backgroundColor: '#f0f0f0',
-                padding: '20px',
-                boxShadow: 3,
-                minHeight: '250px',
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  {proveedor.nombre_proveedor}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {proveedor.email_proveedor}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {proveedor.celular_proveedor}
-                </Typography>
-                <Typography variant="body2" color={proveedor.activo_proveedor ? "green" : "red"}>
-                  Estado: {proveedor.activo_proveedor ? "Activo" : "Inactivo"}
-                </Typography>
-                
-                <UpdateButton onClick={() => handleCardClick(proveedor)}>Actualizar</UpdateButton>
-                <DeactivateButton onClick={() => handleDeactivate(proveedor._id)}>Desactivar</DeactivateButton>
-                <ActivateButton onClick={() => handleActivate(proveedor._id)}>Activar</ActivateButton>
-                <DeleteButton onClick={() => handleDelete(proveedor._id)}>Eliminar</DeleteButton>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Modal para registrar/editar proveedores */}
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>{actionType === 'update' ? "Actualizar Proveedor" : "Registrar Proveedor"}</DialogTitle>
+        <DialogTitle>{actionType === 'create' ? "Crear Proveedor" : "Actualizar Proveedor"}</DialogTitle>
         <DialogContent>
           <TextField
-            margin="dense"
+            fullWidth
+            margin="normal"
             label="Nombre"
             name="nombre_proveedor"
             value={formValues.nombre_proveedor}
             onChange={handleInputChange}
-            fullWidth
           />
           <TextField
-            margin="dense"
+            fullWidth
+            margin="normal"
             label="Email"
             name="email_proveedor"
             value={formValues.email_proveedor}
             onChange={handleInputChange}
-            fullWidth
           />
           <TextField
-            margin="dense"
+            fullWidth
+            margin="normal"
             label="Celular"
             name="celular_proveedor"
             value={formValues.celular_proveedor}
             onChange={handleInputChange}
-            fullWidth
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Cancelar</Button>
-          <Button onClick={handleRegisterAndEnroll}>{actionType === 'update' ? "Actualizar" : "Registrar"}</Button>
+          <Button onClick={handleCloseModal} color="secondary">Cancelar</Button>
+          <Button onClick={handleSaveProveedor} color="primary">
+            {actionType === 'create' ? "Crear" : "Actualizar"}
+          </Button>
         </DialogActions>
       </Dialog>
 

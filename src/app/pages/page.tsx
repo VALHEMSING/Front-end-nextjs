@@ -7,8 +7,6 @@ import ProveedorLista from "./proveedores/lista/ListaProveedores";
 export default function page()  {
   return (
     <>
-      <h1></h1>
-      <ProveedorLista/>
     </>
   );
 }

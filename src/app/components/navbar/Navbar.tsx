@@ -75,8 +75,8 @@ const Navbar = () => {
           </Link>
         </SidebarItem>
         <SidebarItem >
-          <Link href="/about" passHref>
-            <ListItemText primary="About" />
+          <Link href="/pages/clientes" passHref>
+            <ListItemText primary="Clientes" />
           </Link>
         </SidebarItem>
       </List>

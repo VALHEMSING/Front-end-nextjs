@@ -79,6 +79,11 @@ const Navbar = () => {
             <ListItemText primary="Clientes" />
           </Link>
         </SidebarItem>
+        <SidebarItem>
+          <Link href="/pages/productos" passHref style={{ color: "inherit", textDecoration: "none", width: "100%" }}>
+            <ListItemText primary="Productos" />
+          </Link>
+        </SidebarItem>
       </List>
       <SidebarDivider />
       <Typography variant="caption" sx={{ textAlign: "center", display: "block", marginTop: "1rem", opacity: 0.7 }}>

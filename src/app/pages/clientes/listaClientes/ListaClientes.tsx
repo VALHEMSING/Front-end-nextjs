@@ -82,7 +82,7 @@ const ListaClientes = () => {
   const [clientes, setClientes] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [formValues, setFormValues] = useState({
-    numero_identificacion: "",
+    
     nombre_cliente: "",
     email_cliente: "",
     celular_cliente: "",
@@ -113,7 +113,7 @@ const ListaClientes = () => {
     setSelectedCliente(cliente);
     if (cliente) {
       setFormValues({
-        numero_identificacion: cliente.numero_identificacion,
+        
         nombre_cliente: cliente.nombre_cliente,
         email_cliente: cliente.email_cliente,
         celular_cliente: cliente.celular_cliente,
@@ -121,7 +121,7 @@ const ListaClientes = () => {
       setActionType('update');
     } else {
       setFormValues({
-        numero_identificacion: "",
+        
         nombre_cliente: "",
         email_cliente: "",
         celular_cliente: "",
@@ -276,14 +276,7 @@ const ListaClientes = () => {
       <Dialog open={openModal} onClose={handleCloseModal}>
   <DialogTitle>{actionType === 'create' ? "Crear Cliente" : "Actualizar Cliente"}</DialogTitle>
   <DialogContent>
-    <TextField
-      fullWidth
-      margin="normal"
-      label="Número de Identificación"
-      name="numero_identificacion"
-      value={formValues.numero_identificacion}
-      onChange={handleInputChange}
-    />
+  
     <TextField
       fullWidth
       margin="normal"

@@ -77,21 +77,7 @@ const EditButton = styled(ActionButton)(({ theme }) => ({
   },
 }));
 
-const ClienteButton = styled(ActionButton)(({ theme }) => ({
-  backgroundColor: '#4caf50',
-  color: '#fff',
-  '&:hover': {
-    backgroundColor: '#388e3c',
-  },
-}));
 
-const ProveedorButton = styled(ActionButton)(({ theme }) => ({
-  backgroundColor: '#f57c00',
-  color: '#fff',
-  '&:hover': {
-    backgroundColor: '#ef6c00',
-  },
-}));
 
 // Estilo para las filas interactivas
 const InteractiveTableRow = styled(TableRow)({
@@ -133,13 +119,21 @@ const ProductoLista: React.FC = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [clientes, setClientes] = useState<Clientes[]>([]);
   const [clientesSeleccionados, setClientesSeleccionados] = useState<string[]>([]);
+  const [proveedores, setProveedores] = useState<Proveedores[]>([]);
+  const [proveedoresSeleccionados, setProveedoresSeleccionados] = useState<string[]>([]);
   const [producto, setProducto] = useState<Productos | null>(null);
-  const [openClientesModal, setOpenClientesModal] = useState(false);
+  
 
   const obtenerClientes = async () => {
     const response = await fetch('http://localhost:2000/api/clientes');
     const data = await response.json();
     setClientes(data);
+  };
+
+  const obtenerProveedores = async () => {
+    const response = await fetch('http://localhost:2000/api/proveedores');
+    const data = await response.json();
+    setProveedores(data);
   };
 
 
@@ -205,9 +199,12 @@ const ProductoLista: React.FC = () => {
     setClientesSeleccionados(value as string[]); // Asegúrate de que sea un array de strings
   };
 
-
-
-
+  const handleProveedorChange = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setProveedoresSeleccionados(value as string[]); // Asegúrate de que sea un array de strings
+  };
 
   useEffect(() => {
     obtenerProductos();
@@ -216,9 +213,9 @@ const ProductoLista: React.FC = () => {
   useEffect(() => {
     if (openModal) {
       obtenerClientes();
+      obtenerProveedores();
     }
   }, [openModal]);
-
 
 
   const handleCloseSnackbar = () => {
@@ -233,6 +230,7 @@ const ProductoLista: React.FC = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
     setNuevoProducto({ nombre_producto: '', cantidad: 0, precio: 0, proveedor: [], cliente: [], activo: true });
+    setProveedoresSeleccionados ([]);
     setClientesSeleccionados([]);
   };
 
@@ -287,10 +285,12 @@ const ProductoLista: React.FC = () => {
     event.preventDefault();
 
     const clientesSeleccionadosDetalles = clientesSeleccionados.map(id => obtenerClientePorId(id));
+    const proveedoresSeleccionadosDetalles = proveedoresSeleccionados.map(id => obtenerProveedorPorId(id));
 
     const productoData = {
       ...nuevoProducto,
       cliente: clientesSeleccionadosDetalles,
+      proveedor : proveedoresSeleccionadosDetalles,
     };
 
     crearProducto(productoData);
@@ -298,6 +298,10 @@ const ProductoLista: React.FC = () => {
 
   const obtenerClientePorId = (id: string): Clientes => {
     return clientes.find(cliente => cliente.id_cliente === id) as Clientes;
+  };
+
+  const obtenerProveedorPorId = (id: string): Proveedores => {
+    return proveedores.find(proveedor => proveedor.id_proveedor === id) as Proveedores;
   };
 
   const toggleActivo = async (id: string, activo: boolean) => {
@@ -360,7 +364,7 @@ const ProductoLista: React.FC = () => {
                 <TableCell style={{ color: '#6a11cb' }}>Precio</TableCell>
                 <TableCell style={{ color: '#6a11cb' }}>Estado</TableCell>
                 <TableCell style={{ color: '#6a11cb' }}>Clientes Asociados</TableCell>
-                <TableCell style={{ color: '#6a11cb' }}>Proveedores</TableCell>
+                <TableCell style={{ color: '#6a11cb' }}>Proveedores Asociados </TableCell>
                 <TableCell style={{ color: '#6a11cb' }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -386,7 +390,7 @@ const ProductoLista: React.FC = () => {
 
                   <TableCell>
                     {Array.isArray(producto.proveedor) && producto.proveedor.length > 0 ? (
-                      producto.proveedor.map((prov: any) => <div key={prov.id_proveedor}>{prov.nombre_proveedor}</div>)
+                      producto.proveedor.map((prov) => <div key={prov.id_proveedor}>{prov.nombre_proveedor}</div>)
                     ) : (
                       'Sin proveedores'
                     )}
@@ -398,9 +402,9 @@ const ProductoLista: React.FC = () => {
                         <EditIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={producto.activo ? 'Desactivar' : 'Activar'}>
+                    <Tooltip title={producto.activo ?? false ? 'Desactivar' : 'Activar'}>
                       <Button
-                        onClick={() => toggleActivo(producto._id, producto.activo)}
+                        onClick={() => toggleActivo(producto._id, producto.activo?? false)}
                         style={{
                           backgroundColor: producto.activo ? 'green' : 'red',
                           color: '#fff',
@@ -481,6 +485,26 @@ const ProductoLista: React.FC = () => {
                   {clientes.map((cliente) => (
                     <MenuItem key={cliente.id_cliente} value={cliente.id_cliente}>
                       {cliente.nombre_cliente}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Selección de proveedores */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel style={{ color: 'black' }}>Proveedores</InputLabel>
+                <Select
+                  multiple
+                  value={proveedoresSeleccionados}
+                  onChange={handleProveedorChange}
+                  renderValue={(selected) =>
+                    selected.map((id) => obtenerProveedorPorId(id)?.nombre_proveedor).join(', ')
+                  }
+                  sx={{ color: 'black' }}
+                >
+                  {proveedores.map((proveedor) => (
+                    <MenuItem key={proveedor.id_proveedor} value={proveedor.id_proveedor}>
+                      {proveedor.nombre_proveedor}
                     </MenuItem>
                   ))}
                 </Select>
